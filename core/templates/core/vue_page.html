@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Vue + Django</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+  <div id="app">
+    <h1>[[ message ]]</h1>
+  </div>
+
+  <div id="sample_app">
+    <p>[[ message ]]</p>
+    <button @click="removeApp">Unmount App</button>
+  </div>
+
+  <!-- Embed the data from Django -->
+  <script id="vue-data" type="application/json">
+    {{ vue_data|safe }}
+  </script>
+
+  <script>
+    const vueData = JSON.parse(document.getElementById('vue-data').textContent);
+    console.log('the vue data is ', vueData)
+    console.log('the vue message is ', vueData.message)
+
+    Vue.createApp({
+      data() {
+        return vueData;
+      },
+      delimiters: ['[[', ']]']
+    }).mount('#app');
+
+    const sampleApp = Vue.createApp({
+    data() {
+        return {
+        message: 'Loading...'
+        };
+    },
+    delimiters: ['[[', ']]'],
+        created() {
+            console.log('Component created');
+            fetch('/api/data')
+            .then(res => res.json())
+            .then(data => {
+                this.message = data.message;
+                console.log('fetched, ', data.message);
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+            });
+        },
+        mounted() {
+            console.log('Component mounted');
+        },
+        updated() {
+            console.log('Component updated');
+        },
+        unmounted() {
+            console.log('Component unmounted');
+        },
+        methods: {
+            removeApp() {
+            sampleApp.unmount(); // ← triggers unmounted()
+            document.getElementById('sample_app').innerHTML = "<p>App was removed.</p>";
+            }
+        }
+    });
+
+// Mount and store the app instance
+const sampleAppInstance = sampleApp.mount('#sample_app');
+
+  </script>
+</body>
+</html>
