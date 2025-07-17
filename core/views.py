@@ -5,7 +5,7 @@ import json
 def vue_page(request):
     context = {
         'vue_data': json.dumps({
-            'message': 'Hi There from Django!'
+            'message': 'Hi There 2 from Django!'
         })
     }
     print('the context is ', context)
